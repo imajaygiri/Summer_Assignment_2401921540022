@@ -1,2 +1,19 @@
 # Summer Assignment 2401921530276
-4-Week DSA + OOP Assignment
+
+Weekly Assignment
+
+# GUIDE TO RUN CODE
+## for c-code
+
+```bash
+    # for  linux/unix
+    gcc <filename> && ./filename
+
+```
+## for rust-code
+
+```rust
+cd Week_*/Day_*
+cargo run
+
+```
