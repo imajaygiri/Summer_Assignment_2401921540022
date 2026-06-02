@@ -7,7 +7,7 @@ Weekly Assignment
 
 ```bash
     # for  linux/unix
-    gcc <filename> && ./filename
+    gcc <filename.c> -o filename && ./filename
 
 ```
 ## for rust-code
