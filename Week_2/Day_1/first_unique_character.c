@@ -2,15 +2,15 @@
 #include <stddef.h>
 #include <string.h>
 int firstUniqChar(char* s) {
-    int hash[150] = {0};
+    int hash[26] = {0};
 
     int len = strlen(s);
     for (size_t i = 0; i < len; i++) {
-        hash[(unsigned char)s[i]] += 1;
+        hash[(unsigned char)s[i - 'a']] += 1;
     }
 
     for (size_t i = 0; i < len; i++) {
-        if (hash[(unsigned char)s[i]] == 1) {
+        if (hash[(unsigned char)s[i - 'a']] == 1) {
             return i;
         }
     }
