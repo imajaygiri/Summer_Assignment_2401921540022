@@ -1,77 +1,125 @@
+#include <assert.h>
+#include <ctype.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
-char *decodeString(char *s) {
-    int n = strlen(s);
+char stack[100000] = {0};
+int count = 0;
+int top = -1;
 
-    int count_stack[100];
-    char *string_stack[100];
+void reverse_arr(char* arr, int len) {
+    int left = 0;
+    int right = len - 1;
+    while (left < right) {
+        char temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
+        left++;
+        right--;
+    }
+}
 
-    int top = -1;
+void stack_reverse() {
+    int left = 0;
+    int right = top;
 
-    int num = 0;
+    while (left < right) {
+        int temp = stack[left];
+        stack[left] = stack[right];
+        stack[right] = temp;
+        left++;
+        right--;
+    }
+}
 
-    char *curr = calloc(100000, 1);
+void stack_pop() {
+    assert(count > 0);
+    stack[top] = 0;
+    count--;
+    top--;
+}
 
-    for (int i = 0; i < n; i++) {
+void stack_push(char element) {
+    assert(count < 100000);
+    stack[++top] = element;
+    count++;
+}
+
+char stack_top() {
+    assert(top >= 0);
+    return stack[top];
+}
+
+char* decodeString(char* s) {
+    int slen = strlen(s);
+    for (int i = 0; i < slen; i++) {
         char ch = s[i];
+        if (ch == ']') {
+            int idx = 0;
+            char pattern[100000] = {0};
+            // pop until ]
+            while (stack_top() != '[') {
+                pattern[idx++] = stack_top();
+                stack_pop();
+            }
+            stack_pop();  // removing [
+                          // now makes number
 
-        if (isdigit(ch)) {
-            num = num * 10 + (ch - '0');
-        }
+            // reverse the pattern
+            reverse_arr(pattern, idx);
 
-        else if (ch == '[') {
-            count_stack[++top] = num;
-            string_stack[top] = strdup(curr);
+            int num = {0};
+            int place = 1;
+            while (top >= 0 && isdigit(stack_top())) {
+                num += place * (stack_top() - '0');
+                place *= 10;
 
-            curr[0] = '\0';
-            num = 0;
-        }
-
-        else if (ch == ']') {
-            int repeat = count_stack[top];
-
-            char *prev = string_stack[top--];
-
-            int needed =
-                strlen(prev) +
-                strlen(curr) * repeat +
-                1;
-
-            char *temp = calloc(needed, 1);
-
-            strcat(temp, prev);
-
-            for (int j = 0; j < repeat; j++) {
-                strcat(temp, curr);
+                stack_pop();
+            }
+            // now build the pattern and push back to stack
+            // push pattern num times
+            for (int i = 0; i < num; i++) {
+                for (int j = 0; j < idx; j++) {
+                    stack_push(pattern[j]);
+                }
             }
 
-            free(prev);
-            free(curr);
-
-            curr = temp;
-        }
-
-        else {
-            int len = strlen(curr);
-            curr[len] = ch;
-            curr[len + 1] = '\0';
+        } else {
+            stack_push(ch);
         }
     }
 
-    return curr;
+    char* ans = malloc(sizeof(char) * (count + 1));
+
+    for (int i = 0; i < count; i++) {
+        ans[i] = stack[i];
+    }
+    ans[count] = '\0';
+
+    count = 0;
+    top = -1;
+    return ans;
 }
 
-int main() {
-    char s[] = "3[a2[c]]";
+typedef struct {
+    char* args;
+    char* expected;
+} test_t;
 
-    char *ans = decodeString(s);
+int main(void) {
+    test_t t[3] = {{.args = "3[a]2[bc]", .expected = "aaabcbc"},
+                   {.args = "3[a2[c]]", .expected = "accaccacc"},
+                   {
+                       .args = "2[abc]3[cd]ef",
+                       .expected = "abcabccdcdcdef",
+                   }};
 
-    printf("%s\n", ans);
-
-    free(ans);
-
+    for (int i = 0; i < 3; i++) {
+        char* ans = decodeString(t[i].args);
+        assert(strcmp(ans, t[i].expected) == 0);
+        free(ans);
+    }
     return 0;
 }
