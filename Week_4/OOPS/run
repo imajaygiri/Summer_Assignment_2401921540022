@@ -1,0 +1,5 @@
+javac *.java -d out 
+sleep 1
+
+java -cp out ToTestInt
+
